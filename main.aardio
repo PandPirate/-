@@ -1,0 +1,78 @@
+import win.ui;
+import web.rest.jsonLiteClient;
+import debug
+import preg
+import curl
+/*DSG{{*/
+mainForm = win.form(text="五笔";right=769;bottom=579)
+mainForm.add(
+bkplus={cls="bkplus";left=128;top=339;right=660;bottom=541;ah=1;aw=1;background="\res\img\wbjp.png";z=5};
+button={cls="button";text="查询";left=466;top=91;right=511;bottom=125;aw=1;z=4};
+edit={cls="edit";left=383;top=93;right=439;bottom=124;align="center";aw=1;edge=1;z=3};
+plus={cls="plus";left=466;top=164;right=716;bottom=243;z=6};
+plus2={cls="plus";left=141;top=164;right=246;bottom=243;z=7};
+static={cls="static";text="五笔";left=213;top=44;right=586;bottom=79;align="center";aw=1;font=LOGFONT(h=-21);notify=1;transparent=1;z=1};
+static2={cls="static";text="请输入汉字:";left=242;top=90;right=378;bottom=130;align="center";aw=1;font=LOGFONT(h=-24);transparent=1;z=2}
+)
+/*}}*/
+
+mainForm.static.oncommand = function(id,event){
+	
+}
+
+mainForm.edit.oncommand = function(id,event){
+	
+}
+
+mainForm.button.oncommand = function(id,event){
+	if (3 === #(mainForm.edit.text)){
+	if(!io.exist("res/pic/" ++ mainForm.edit.text ++ ".jpg")){
+	var http = web.rest.jsonLiteClient();
+	var api = http.api("http://www.daziba.cn/wbDic/Default.aspx?id=5983316", "POST")
+	var ret = api.name.post({
+	"__VIEWSTATE": "/wEPDwUJNjk2Mjk5MDI2ZGSqNMoDzCBztRi6ks8Nity7oP2iVw==",
+	"__VIEWSTATEGENERATOR": "A8BAB675",
+	"__EVENTVALIDATION": "/wEWAwLGg8roCwKUzfM5Ap/S8NgD3Boq3adlgP0G36+FJExepTL1hXw=",
+	"WB_HZ": mainForm.edit.text,
+	"WB_Query": "五笔查询"
+});
+	
+	var url = null;
+	var regex = preg("wbDic_Img/[0-9]+.png");
+	for scheme in regex.gmatch( ret  ) { 
+    	url = string.concat("http://www.daziba.cn/wbDic/", scheme);
+}
+	
+	api = http.api(url, "GET")
+	api.receiveFile("res/pic/" ++ mainForm.edit.text ++ ".jpg").get();
+	
+	
+}
+	mainForm.plus.background = "res/pic/" ++ mainForm.edit.text ++ ".jpg";
+	
+	if(!io.exist("res/hanyu_gif/" ++ mainForm.edit.text ++ ".gif")){
+	var http = curl.easy();
+	var str = http.get("https://hanyu.baidu.com/zici/s?wd=" ++ mainForm.edit.text);
+	
+	
+	regex = preg("https:\/\/hanyu-word-gif\.cdn\.bcebos\.com\/[a-zA-Z0-9]+\.gif");	
+	for scheme in regex.gmatch( str  ) { 
+		string.save("/res/hanyu_gif/" ++ mainForm.edit.text ++ ".gif", http.get(scheme));
+    }       
+	http.close();
+	}
+mainForm.plus2.background = "/res/hanyu_gif/" ++ mainForm.edit.text ++ ".gif";
+	}
+	else {
+	mainForm.msgbox("请输入一个汉字
+	
+", "提示");
+	}
+	
+	
+}
+
+
+
+mainForm.show();
+return win.loopMessage();
